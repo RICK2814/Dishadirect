@@ -30,7 +30,11 @@ const SkillsRecommendationOutputSchema = z.object({
     z.object({
       title: z.string().describe('The title of the learning path.'),
       description: z.string().describe('A brief description of the learning path.'),
-      steps: z.array(z.string()).describe('The steps in the learning path.'),
+      steps: z.array(z.object({
+        title: z.string().describe('The title of the step.'),
+        description: z.string().describe('A brief description of the step.'),
+        duration: z.string().describe('An estimated duration to complete the step (e.g., "1 week", "2-3 days").')
+      })).describe('The steps in the learning path.'),
     })
   ).describe('A list of learning paths to acquire the necessary skills.'),
 });
@@ -44,9 +48,11 @@ const prompt = ai.definePrompt({
   name: 'skillsRecommendationPrompt',
   input: {schema: SkillsRecommendationInputSchema},
   output: {schema: SkillsRecommendationOutputSchema},
-  prompt: `You are an expert career advisor specializing in recommending resources and learning paths to acquire skills for students.
+  prompt: `You are an expert career advisor specializing in recommending resources and learning paths to acquire skills for students in India.
 
 You will use the student's desired career path and skills gap to recommend resources and learning paths.
+
+For each learning path, provide a clear title, a brief description, and a series of actionable steps. Each step should include a title, a short description, and an estimated duration (e.g., "1-2 weeks").
 
 Career Path: {{{careerPath}}}
 Skills Gap: {{{skillsGap}}}

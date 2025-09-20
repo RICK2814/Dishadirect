@@ -11,8 +11,10 @@ import {
   Briefcase,
   ChevronRight,
   ClipboardList,
+  Flame,
   Lightbulb,
   Loader2,
+  Milestone,
   Mic,
   Sparkles,
   Target,
@@ -427,11 +429,29 @@ export function DishaDirectApp() {
                                               <div className="space-y-4 mt-2">
                                               {skillRecsResult.learningPaths.map((path, i) => (
                                                 <div key={i} className="p-4 border rounded-lg">
-                                                  <h4 className="font-semibold">{path.title}</h4>
-                                                  <p className="text-sm text-muted-foreground mb-2">{path.description}</p>
-                                                  <ul className="space-y-1 list-disc list-inside">
-                                                    {path.steps.map((step, j) => <li key={j} className="text-sm">{step}</li>)}
-                                                  </ul>
+                                                  <h4 className="font-semibold text-base mb-2">{path.title}</h4>
+                                                  <p className="text-sm text-muted-foreground mb-4">{path.description}</p>
+                                                  <div className="relative pl-6">
+                                                    {path.steps.map((step, j) => (
+                                                      <div key={j} className="flex items-start mb-4 last:mb-0">
+                                                        <div className="absolute left-0 flex flex-col items-center">
+                                                          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                                            <Flame className="h-4 w-4" />
+                                                          </div>
+                                                          {j < path.steps.length - 1 && <div className="w-px h-full bg-border mt-1"></div>}
+                                                        </div>
+                                                        <div className="pl-4 flex-1">
+                                                          <div className="flex justify-between items-start">
+                                                            <div>
+                                                              <p className="font-semibold text-sm">{step.title}</p>
+                                                              <p className="text-sm text-muted-foreground">{step.description}</p>
+                                                            </div>
+                                                            <Badge variant="outline" className="ml-4 shrink-0">{step.duration}</Badge>
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    ))}
+                                                  </div>
                                                 </div>
                                               ))}
                                               </div>
