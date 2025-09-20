@@ -442,7 +442,7 @@ export function DishaDirectApp() {
                                                       <div key={j} className="flex items-start mb-4 last:mb-0">
                                                         <div className="absolute left-0 flex flex-col items-center">
                                                           <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                                            <Flame className="h-4 w-4" />
+                                                            <Milestone className="h-4 w-4" />
                                                           </div>
                                                           {j < path.steps.length - 1 && <div className="w-px h-full bg-border mt-1"></div>}
                                                         </div>
@@ -540,5 +540,3 @@ export function DishaDirectApp() {
     </div>
   );
 }
-
-    
