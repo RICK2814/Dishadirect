@@ -16,6 +16,10 @@ import {
   getSkillsRecommendation,
   type SkillsRecommendationInput,
 } from "@/ai/flows/skills-recommendation";
+import {
+  getInterviewPrep,
+  type InterviewPrepInput,
+} from "@/ai/flows/interview-prep";
 
 export async function getCareerPathRecommendations(
   input: CareerPathRecommendationsInput
@@ -35,4 +39,8 @@ export async function fetchSkillsRecommendation(
   input: SkillsRecommendationInput
 ) {
   return await getSkillsRecommendation(input);
+}
+
+export async function fetchInterviewPrep(input: InterviewPrepInput) {
+  return await getInterviewPrep(input);
 }

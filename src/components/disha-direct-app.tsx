@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Lightbulb,
   Loader2,
+  Mic,
   Sparkles,
   Target,
   TrendingUp,
@@ -21,11 +22,13 @@ import type { CareerPathRecommendationsOutput } from "@/ai/flows/career-path-rec
 import type { JobMarketTrendsOutput } from "@/ai/flows/job-market-trends";
 import type { SkillsGapAnalysisOutput } from "@/ai/flows/skills-gap-analysis";
 import type { SkillsRecommendationOutput } from "@/ai/flows/skills-recommendation";
+import type { InterviewPrepOutput } from "@/ai/flows/interview-prep";
 import {
   getCareerPathRecommendations,
   fetchJobMarketTrends,
   runSkillsGapAnalysis,
   fetchSkillsRecommendation,
+  fetchInterviewPrep,
 } from "@/app/actions";
 import { Logo } from "@/components/icons";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -55,12 +58,16 @@ export function DishaDirectApp() {
   const [marketTrendsResult, setMarketTrendsResult] = useState<JobMarketTrendsOutput | null>(null);
   const [skillsGapResult, setSkillsGapResult] = useState<SkillsGapAnalysisOutput | null>(null);
   const [skillRecsResult, setSkillRecsResult] = useState<SkillsRecommendationOutput | null>(null);
-  
+  const [interviewPrepResult, setInterviewPrepResult] = useState<InterviewPrepOutput | null>(null);
+
   const [userProfile, setUserProfile] = useState<ProfileFormValues | null>(null);
   const [selectedCareer, setSelectedCareer] = useState<string>('');
+  const [activeTab, setActiveTab] = useState("career-paths");
 
   const [isLoading, setIsLoading] = useState(false);
   const [isSkillsLoading, setIsSkillsLoading] = useState(false);
+  const skillsTabRef = useRef<HTMLDivElement>(null);
+
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -73,8 +80,10 @@ export function DishaDirectApp() {
     setMarketTrendsResult(null);
     setSkillsGapResult(null);
     setSkillRecsResult(null);
+    setInterviewPrepResult(null);
     setSelectedCareer('');
     setUserProfile(data);
+    setActiveTab("career-paths");
 
     try {
       const [careerPaths, marketTrends] = await Promise.all([
@@ -97,14 +106,24 @@ export function DishaDirectApp() {
 
   const handleCareerSelection = async (career: string) => {
     setSelectedCareer(career);
+    setActiveTab("skills-dev");
     if (!userProfile || !career) return;
+    
+    // Scroll to the skills development tab content for better UX
+    setTimeout(() => skillsTabRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
 
     setIsSkillsLoading(true);
     setSkillsGapResult(null);
     setSkillRecsResult(null);
+    setInterviewPrepResult(null);
     try {
-      const skillsGap = await runSkillsGapAnalysis({ currentSkills: userProfile.skills, desiredCareerPath: career });
+      const [skillsGap, interviewPrep] = await Promise.all([
+        runSkillsGapAnalysis({ currentSkills: userProfile.skills, desiredCareerPath: career }),
+        fetchInterviewPrep({ careerPath: career, userSkills: userProfile.skills }),
+      ]);
+      
       setSkillsGapResult(skillsGap);
+      setInterviewPrepResult(interviewPrep);
       
       if (skillsGap.missingSkills) {
         const recommendations = await fetchSkillsRecommendation({ careerPath: career, skillsGap: skillsGap.missingSkills });
@@ -218,7 +237,7 @@ export function DishaDirectApp() {
                 </p>
               </Card>
             ) : (
-              <Tabs defaultValue="career-paths">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="career-paths"><Briefcase className="mr-2 h-4 w-4"/>Career Paths</TabsTrigger>
                   <TabsTrigger value="market-trends"><TrendingUp className="mr-2 h-4 w-4"/>Market Trends</TabsTrigger>
@@ -245,12 +264,14 @@ export function DishaDirectApp() {
                         <h3 className="text-xl font-headline font-semibold mb-4 flex items-center gap-2"><ClipboardList className="text-primary"/>Recommended Career Paths</h3>
                         <div className="grid gap-4 md:grid-cols-2">
                           {careerPathsResult.careerPaths.map((path, i) => (
-                            <Card key={i} className="hover:shadow-md transition-shadow">
-                              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-base font-medium font-headline">{path}</CardTitle>
-                                <ChevronRight className="h-5 w-5 text-muted-foreground"/>
-                              </CardHeader>
-                            </Card>
+                            <button key={i} onClick={() => handleCareerSelection(path)} className="w-full text-left">
+                              <Card className="hover:shadow-md hover:border-primary transition-all h-full">
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                  <CardTitle className="text-base font-medium font-headline">{path}</CardTitle>
+                                  <ChevronRight className="h-5 w-5 text-muted-foreground"/>
+                                </CardHeader>
+                              </Card>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -288,7 +309,7 @@ export function DishaDirectApp() {
                   ) : null}
                 </TabsContent>
 
-                <TabsContent value="skills-dev" className="mt-6 space-y-6">
+                <TabsContent value="skills-dev" className="mt-6 space-y-6" ref={skillsTabRef}>
                   <Card>
                     <CardHeader>
                       <CardTitle className="font-headline">Select a Career Path to Analyze</CardTitle>
@@ -308,9 +329,20 @@ export function DishaDirectApp() {
                     </CardContent>
                   </Card>
 
+                  {!selectedCareer && !isSkillsLoading && (
+                    <Card className="flex flex-col items-center justify-center text-center p-8 h-full">
+                      <Target className="h-12 w-12 text-muted-foreground mb-4" />
+                      <h2 className="font-headline text-xl font-bold">Plan Your Growth</h2>
+                      <p className="text-muted-foreground mt-2 max-w-md">
+                        Select a career path above to get a personalized skills development and interview preparation plan.
+                      </p>
+                    </Card>
+                  )}
+
                   {isSkillsLoading ? (
                     <div className="space-y-4">
                       <Skeleton className="h-24 w-full" />
+                      <Skeleton className="h-40 w-full" />
                       <Skeleton className="h-40 w-full" />
                     </div>
                   ) : (
@@ -375,6 +407,40 @@ export function DishaDirectApp() {
                                 </AccordionContent>
                               </AccordionItem>
                             )}
+                          </Accordion>
+                        </CardContent>
+                      </Card>
+                    )}
+
+                    {interviewPrepResult && (
+                       <Card>
+                        <CardHeader>
+                          <CardTitle className="font-headline flex items-center gap-2"><Mic className="text-accent"/>Interview Prep</CardTitle>
+                          <CardDescription>Practice questions and tips for your <span className="font-bold text-primary">{selectedCareer}</span> interview.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <Accordion type="multiple" className="w-full">
+                            <AccordionItem value="questions">
+                              <AccordionTrigger className="text-lg font-semibold">Sample Questions</AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-4 mt-2">
+                                  {interviewPrepResult.sampleQuestions.map((item, i) => (
+                                    <div key={i} className="p-4 border rounded-lg">
+                                      <p className="font-semibold">{i+1}. {item.question}</p>
+                                      <p className="text-sm text-muted-foreground mt-2">{item.answer_guideline}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                             <AccordionItem value="tips">
+                              <AccordionTrigger className="text-lg font-semibold">Preparation Tips</AccordionTrigger>
+                              <AccordionContent>
+                                <ul className="space-y-2 list-disc list-inside mt-2">
+                                  {interviewPrepResult.preparationTips.map((tip, i) => <li key={i} className="text-sm">{tip}</li>)}
+                                </ul>
+                              </AccordionContent>
+                            </AccordionItem>
                           </Accordion>
                         </CardContent>
                       </Card>
