@@ -291,6 +291,7 @@ export function DishaDirectApp() {
                             <div className="space-y-4">
                               <Skeleton className="h-32 w-full" />
                               <Skeleton className="h-24 w-full" />
+                              <Skeleton className="h-24 w-full" />
                             </div>
                           ) : careerPathsResult ? (
                             <motion.div className="grid gap-6" variants={containerVariants} initial="hidden" animate="visible">
@@ -308,12 +309,17 @@ export function DishaDirectApp() {
                                 <h3 className="text-xl font-headline font-semibold mb-4 flex items-center gap-2"><ClipboardList className="text-primary"/>Recommended Career Paths</h3>
                                 <div className="grid gap-4 md:grid-cols-2">
                                   {careerPathsResult.careerPaths.map((path, i) => (
-                                    <button key={i} onClick={() => handleCareerSelection(path)} className="w-full text-left">
+                                    <button key={i} onClick={() => handleCareerSelection(path.name)} className="w-full text-left">
                                       <Card className="hover:shadow-md hover:border-primary transition-all h-full">
-                                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                          <CardTitle className="text-base font-medium font-headline">{path}</CardTitle>
-                                          <ChevronRight className="h-5 w-5 text-muted-foreground"/>
+                                        <CardHeader>
+                                          <div className="flex justify-between items-start">
+                                            <CardTitle className="text-base font-medium font-headline">{path.name}</CardTitle>
+                                            <ChevronRight className="h-5 w-5 text-muted-foreground ml-4"/>
+                                          </div>
                                         </CardHeader>
+                                        <CardContent>
+                                          <p className="text-sm text-muted-foreground">{path.description}</p>
+                                        </CardContent>
                                       </Card>
                                     </button>
                                   ))}
@@ -370,7 +376,7 @@ export function DishaDirectApp() {
                                 </SelectTrigger>
                                 <SelectContent>
                                   {careerPathsResult?.careerPaths.map((path, i) => (
-                                    <SelectItem key={i} value={path}>{path}</SelectItem>
+                                    <SelectItem key={i} value={path.name}>{path.name}</SelectItem>
                                   ))}
                                 </SelectContent>
                               </Select>

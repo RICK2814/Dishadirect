@@ -25,7 +25,14 @@ export type CareerPathRecommendationsInput = z.infer<
 
 const CareerPathRecommendationsOutputSchema = z.object({
   careerPaths: z
-    .array(z.string())
+    .array(
+      z.object({
+        name: z.string().describe('The name of the career path.'),
+        description: z
+          .string()
+          .describe('A brief description of the career path.'),
+      })
+    )
     .describe('A list of personalized career path recommendations.'),
   reasoning: z
     .string()
@@ -50,13 +57,15 @@ const prompt = ai.definePrompt({
   prompt: `You are a career advisor for students in India.
 
   Based on the student's skills and interests, provide a list of personalized career path recommendations.
+  For each career path, provide a name and a brief description.
   Also, provide a brief explanation of why you recommended these career paths based on the student's profile.
 
   Skills: {{{skills}}}
   Interests: {{{interests}}}
 
   Format your response as a JSON object with "careerPaths" and "reasoning" fields.
-  The "careerPaths" field is a list of career paths and the "reasoning" field is a string.
+  The "careerPaths" field is a list of objects, each with a "name" and "description" field.
+  The "reasoning" field is a string.
   `,
 });
 
