@@ -14,10 +14,10 @@ import {z} from 'genkit';
 const CareerPathRecommendationsInputSchema = z.object({
   skills: z
     .string()
-    .describe('A comma-separated list of the user\u0027s skills.'),
+    .describe('A comma-separated list of the user\'s skills.'),
   interests: z
     .string()
-    .describe('A comma-separated list of the user\u0027s interests.'),
+    .describe('A comma-separated list of the user\'s interests.'),
 });
 export type CareerPathRecommendationsInput = z.infer<
   typeof CareerPathRecommendationsInputSchema
@@ -55,8 +55,8 @@ const prompt = ai.definePrompt({
   Skills: {{{skills}}}
   Interests: {{{interests}}}
 
-  Format your response as a JSON object with \"careerPaths\" and \"reasoning\" fields.
-  The \"careerPaths\" field is a list of career paths and the \"reasoning\" field is a string.
+  Format your response as a JSON object with "careerPaths" and "reasoning" fields.
+  The "careerPaths" field is a list of career paths and the "reasoning" field is a string.
   `,
 });
 
