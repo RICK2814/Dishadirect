@@ -1,3 +1,10 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "career-guidance",
+      "description": "An illustration representing career guidance and future planning.",
+      "imageUrl": "https://picsum.photos/seed/career/800/600",
+      "imageHint": "career guidance illustration"
+    }
+  ]
 }
