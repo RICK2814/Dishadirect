@@ -6,3 +6,6 @@ import '@/ai/flows/skills-recommendation.ts';
 import '@/ai/flows/career-path-recommendations.ts';
 import '@/ai/flows/skills-gap-analysis.ts';
 import '@/ai/flows/interview-prep.ts';
+
+// Export the AI instance for use in flows
+export { ai } from './genkit';
